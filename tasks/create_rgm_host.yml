@@ -16,6 +16,19 @@
     validate_certs: false
   register: rgm_token
 
+- name: create_rgm_host | check rgm host
+  uri:
+    url: 'https://{{ rgm_ip }}/rgmapi/getHost'
+    method: POST
+    body:
+      token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
+      hostName: "{{ ansible_nodename }}"
+      hostIp: "{{ ansible_default_ipv4['address'] }}"
+      templateHostName: "{{ d_rgm_template }}"
+    body_format: json
+    validate_certs: no
+  register: get_rgm_host_task
+
 - name: create_rgm_host | create rgm host
   uri:
     url: 'https://{{ rgm_ip }}/{{ apipath[0].createhostpath }}'
@@ -28,6 +41,7 @@
       exportConfiguration: true
     body_format: json
     validate_certs: false
+  when: get_rgm_host_task.json.result is not mapping
 
 - name: create_rgm_host | export configuration
   uri:
@@ -39,3 +53,5 @@
     body_format: json
     status_code: 200
     validate_certs: false
+  when: get_rgm_host_task.json.result is not mapping
+
