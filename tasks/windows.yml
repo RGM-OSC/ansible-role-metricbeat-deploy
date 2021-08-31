@@ -34,7 +34,7 @@
   when: not service_info['exists']
   notify: win restart metricbeat service
 
-- name: windows | remoev downloaded rgm onliner script
+- name: windows | remove downloaded rgm onliner script
   win_file:
     path: 'C:\temp\Add-RGMHost.ps1'
     state: absent

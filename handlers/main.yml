@@ -9,3 +9,4 @@
   service:
     name: metricbeat
     state: restarted
+    sleep: 5

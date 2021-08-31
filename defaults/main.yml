@@ -3,15 +3,15 @@ d_rgm_template: 'RGM_LINUX_ES'
 d_rgm_win_template: 'RGM_WINDOWS_ES'
 d_rgm_exportjob_name: 'Incremental Nagios Export'
 remove_metricbeat_services: 'no'
-d_metric_sys_core_period: '2m'
-d_metric_sys_fs_period: '2m'
-d_metric_sys_uptime_period: '2m'
-d_metric_sys_core_metrics:
-  - cpu
-  - load
-  - memory
-  - network
-  - process
-  - process_summary
-  - socket_summary
-  - diskio
+# d_metric_sys_core_period: '2m'
+# d_metric_sys_fs_period: '2m'
+# d_metric_sys_uptime_period: '2m'
+# d_metric_sys_core_metrics:
+#   - cpu
+#   - load
+#   - memory
+#   - network
+#   - process
+#   - process_summary
+#   - socket_summary
+#   - diskio

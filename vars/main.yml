@@ -2,9 +2,14 @@
 v_deb_needed_pkg:
   - lsb-release
 v_centos_needed_pkg:
-  - redhat-lsb-core
+  # - redhat-lsb-core
   - nss
   - openssl
   - curl
 v_mbd_dest: /tmp/install-metricbeat.bash
+beats_version: oss-latest
+beat: metricbeat
+beats_package_url: "https://{{ rgm_ip }}/distrib/packages"
 v_win_url_oneliner: 'https://{{ rgm_ip }}/distrib/install/Add-RGMHost.ps1'
+
+metricbeat_linux_conf_path: https://{{ rgm_ip }}/distrib/conf

@@ -1,35 +1,53 @@
 ---
-- name: linux | import debian specific tasks
-  import_tasks: debian.yml
-  when: ansible_distribution == 'Debian'
-
-- name: linux | import centos specific tasks
-  import_tasks: centos.yml
-  when: ansible_distribution == 'CentOS'
-
 - name: linux | test is metricbeat already deployed
   stat:
     path: /etc/metricbeat
   register: metricbeat_conf_dir
 
-- name: linux | import metricbeat deployement and rgm config
-  import_tasks: deploy.yml
-  when: not metricbeat_conf_dir.stat.exists
+- name: linux | import debian specific tasks
+  import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: linux | import centos specific tasks
+  import_tasks: centos.yml
+  when: ansible_os_family == 'RedHat'
+
+# - name: linux | import metricbeat deployement and rgm config
+#   import_tasks: deploy.yml
+#   when: not metricbeat_conf_dir.stat.exists
 
 - name: linux | deploy rgm system metrics configurations
-  template:
+  become: yes
+  get_url:
+    url: '{{ item.src }}'
     dest: '{{ item.dest }}'
-    src: '{{ item.src }}'
     owner: root
     group: root
     mode: 0644
+    validate_certs: no
   with_items:
-    - {src: 'metricbeat/module-system-core.yml.j2', dest: '/etc/metricbeat/modules.d/rgm-system-core.yml'}
-    - {src: 'metricbeat/module-system-fs.yml.j2', dest: '/etc/metricbeat/modules.d/rgm-system-fs.yml'}
-    - {src: 'metricbeat/module-system-uptime.yml.j2', dest: '/etc/metricbeat/modules.d/rgm-system-uptime.yml'}
-  notify: restart metricbeat service
+    - {src: '{{ metricbeat_linux_conf_path }}/linux_metricbeat.yml', dest: '/etc/metricbeat/metricbeat.yml'}
+    - {src: '{{ metricbeat_linux_conf_path }}/modules/linux_rgm-system-core.yml', dest: '/etc/metricbeat/modules.d/rgm-system-core.yml'}
+    - {src: '{{ metricbeat_linux_conf_path }}/modules/linux_rgm-system-fs.yml', dest: '/etc/metricbeat/modules.d/rgm-system-fs.yml'}
+    - {src: '{{ metricbeat_linux_conf_path }}/modules/linux_rgm-system-uptime.yml', dest: '/etc/metricbeat/modules.d/rgm-system-uptime.yml'}
   tags:
     - configure
+
+- name: linux | set current host IP in linux_metricbeat.yml
+  become: yes
+  lineinfile:
+    path: /etc/metricbeat/metricbeat.yml
+    regexp : '^  host.ip: %%IP%%$'
+    line: "  host.ip: {{ ansible_default_ipv4.address }}"
+
+- name: linux | Change linux_metricbeat.yml ownership, group and permissions
+  become: yes
+  ansible.builtin.file:
+    path: /etc/metricbeat/metricbeat.yml
+    owner: root
+    group: root
+    mode: '0640'
+
 
 - name: linux | test is metricbeat default system module is active
   stat:
@@ -39,20 +57,20 @@
     - configure
 
 - name: linux | copy original system module configuration
+  become: yes
   copy:
     src: '/etc/metricbeat/modules.d/system.yml'
     dest: '/etc/metricbeat/modules.d/system.yml.disabled'
     remote_src: true
-  notify: restart metricbeat service
   when: metricbeat_system_mod.stat.exists
   tags:
     - configure
 
 - name: linux | delete active default system module
+  become: yes
   file:
     path: '/etc/metricbeat/modules.d/system.yml'
     state: absent
-  notify: restart metricbeat service
   when: metricbeat_system_mod.stat.exists
   tags:
     - configure
@@ -63,3 +81,13 @@
 - name: linux | import create rgm host
   import_tasks: create_rgm_host.yml
   when: not metricbeat_conf_dir.stat.exists
+
+- name: linux | Pause before start service
+  pause:
+    seconds: 5
+
+- name: linux | restart metricbeat service
+  become: yes
+  service:
+    name: metricbeat
+    state: restarted
