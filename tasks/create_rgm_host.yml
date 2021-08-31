@@ -10,7 +10,7 @@
 
 - name: create_rgm_host | create rgm host
   uri:
-    url: 'https://{{ rgm_ip }}/{{ rgmapi_version }}/createHost'
+    url: 'https://{{ rgm_ip }}/{{ rgmapi_version }}/host/createHost'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
@@ -23,7 +23,7 @@
 
 - name: create_rgm_host | export configuration
   uri:
-    url: 'https://{{ rgm_ip }}/{{ rgmapi_version }}/exportConfiguration'
+    url: 'https://{{ rgm_ip }}/{{ rgmapi_version }}/nagios/export/exportConfiguration'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
