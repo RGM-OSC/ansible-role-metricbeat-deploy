@@ -13,3 +13,5 @@ beats_package_url: "https://{{ rgm_ip }}/distrib/packages"
 v_win_url_oneliner: 'https://{{ rgm_ip }}/distrib/install/Add-RGMHost.ps1'
 
 metricbeat_linux_conf_path: https://{{ rgm_ip }}/distrib/conf
+
+rgmapi_version: "api/v2"
