@@ -2,7 +2,7 @@
 
 - name: define current api path
   set_fact:
-    apipath: "{{ api  | json_query(query)}}"
+    apipath: "{{ api | community.general.json_query(query) }}"
   vars:
     query: "[?paths.version=='{{ rgmapi_version }}'].paths"
 
