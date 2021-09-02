@@ -25,8 +25,8 @@ api:
       exportconfpath: "api/v2/nagios/export/exportConfiguration"
   - paths:
       version: "v1"
-      gettokenpath: "/getAuthToken"
-      createhostpath: "/createHost"
-      exportconfpath: "/exportConfiguration"
+      gettokenpath: "getAuthToken"
+      createhostpath: "createHost"
+      exportconfpath: "exportConfiguration"
 
 # to force RGM registration, use force_rgm_registration=yes
