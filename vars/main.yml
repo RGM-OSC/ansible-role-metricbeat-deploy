@@ -28,3 +28,5 @@ api:
       gettokenpath: "/getAuthToken"
       createhostpath: "/createHost"
       exportconfpath: "/exportConfiguration"
+
+# to force RGM registration, use force_rgm_registration=yes

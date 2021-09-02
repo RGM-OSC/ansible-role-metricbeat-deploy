@@ -80,7 +80,7 @@
 
 - name: linux | import create rgm host
   import_tasks: create_rgm_host.yml
-  when: not metricbeat_conf_dir.stat.exists
+  when: not metricbeat_conf_dir.stat.exists or force_rgm_registration is defined
 
 - name: linux | Pause before start service
   pause:
