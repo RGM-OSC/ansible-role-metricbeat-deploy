@@ -15,6 +15,7 @@ Some of this variables **absolutely need to be defined** to get fully working pl
 
 - rgm_adm_username
 - rgm_adm_password
+- rgm_ip
 
 ## Role Variables
 
@@ -29,18 +30,8 @@ Some of this variables **absolutely need to be defined** to get fully working pl
 | ```no_export_config```           | no                        | Windows only. do not export rgm configuration. usefull for larges volumes |
 | ```script_verbose```             | no                        | Windows only. launch script in verbose mode              |
 | ```remove_metricbeat_services``` | no                        | Launch only metricbeat service deletion                  |
-| ```d_metric_sys_core_period```   | 2m                        | Metricbeat data collection interval for core sys modules |
-| ```d_metric_sys_fs_period```     | 2m                        | Metricbeat data collection interval for fs sys modules   |
-| ```d_metric_sys_uptime_period``` | 2m                        | Metricbeat data collection interval for uptime module    |
-| ```metric_sys_fs_raid_enabled``` |                           | If variable declared, activate metricbeat raid module    |
-| ```d_metric_sys_core_metrics```  | cpu                       | Defaults metrics collection enable in system module      |
-|                                  | load                      |                                                          |
-|                                  | memory                    |                                                          |
-|                                  | network                   |                                                          |
-|                                  | process                   |                                                          |
-|                                  | process_summary           |                                                          |
-|                                  | socket_summary            |                                                          |
-|                                  | diskio                    |                                                          |
+| ```rgmapi_version```             | v2                        | Select the api version, v1 is for previous RGM installations |
+| ```force_rgm_registration```     |                           | create this variable to force rgm host registration even metricbeat already installed |
 
 ## Role tags
 
@@ -55,6 +46,7 @@ All variables such as :
 
 - `rgm_adm_username`
 - `rgm_adm_password`
+- `rgm_ip`
 - `ansible_user` (for windows hosts)
 - `ansible_password` (for windows hosts)
 - `ansible_connection` (for windows hosts)
@@ -62,11 +54,11 @@ All variables such as :
 - `ansible_wirm_scheme` (for windows hosts)
 - `ansible_port` (for windows hosts)
 
-Note: You could store more other variables in vault such as `d_rgm_template` or `d_rgm_ip` to centralize variables filling.
+Note: You could store more other variables in vault such as `d_rgm_template` to centralize variables filling.
 
 ## Dependencies
 
-No specific dependencies expected here.
+collection: community.general
 
 ## Example Playbook
 
@@ -88,6 +80,7 @@ BSD
 ## Author Information
 
 Initial write by Vincent Fricou <vincent@fricouv.eu> (2019), release under the terms of BSD licences
+Updated by Guillaume AUGEY 2021
 
 ### Contributions
 
