@@ -1,7 +1,10 @@
 ---
 - name: hold_pkg | debian hold package to prevent unneeded updates
-  shell: apt-mark hold metricbeat
-  when: ansible_distribution == 'Debian'
+  become: yes
+  dpkg_selections:
+    name: "{{ beat }}"
+    selection: hold
+  when: ansible_os_family == 'Debian'
 
 - block:
   - name: hold_pkg | centos stat if elasticsearch repository exist
@@ -16,4 +19,4 @@
       line: 'exclude=metricbeat'
     when: elk_repository.stat.exists
 
-  when: ansible_distribution == 'CentOS'
+  when: ansible_os_family == 'RedHat'

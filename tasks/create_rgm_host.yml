@@ -1,7 +1,15 @@
 ---
+
+- name: define current api path
+  set_fact:
+    apipath: "{{ api | community.general.json_query(query) }}"
+  vars:
+    query: "[?paths.version=='{{ rgmapi_version }}'].paths"
+
+
 - name: create_rgm_host | get rgm token
   uri:
-    url: 'https://{{ rgm_ip }}/rgmapi/getAuthToken?username={{ rgm_adm_username }}&password={{ rgm_adm_password }}'
+    url: 'https://{{ rgm_ip }}/{{ apipath[0].gettokenpath }}?username={{ rgm_adm_username }}&password={{ rgm_adm_password }}'
     remote_src: true
     method: GET
     status_code: 200
@@ -10,7 +18,7 @@
 
 - name: create_rgm_host | create rgm host
   uri:
-    url: 'https://{{ rgm_ip }}/rgmapi/createHost'
+    url: 'https://{{ rgm_ip }}/{{ apipath[0].createhostpath }}'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
@@ -23,7 +31,7 @@
 
 - name: create_rgm_host | export configuration
   uri:
-    url: 'https://{{ rgm_ip }}/rgmapi/exportConfiguration'
+    url: 'https://{{ rgm_ip }}/{{ apipath[0].exportconfpath }}'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"

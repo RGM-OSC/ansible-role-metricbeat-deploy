@@ -2,9 +2,31 @@
 v_deb_needed_pkg:
   - lsb-release
 v_centos_needed_pkg:
-  - redhat-lsb-core
+  # - redhat-lsb-core
   - nss
   - openssl
   - curl
 v_mbd_dest: /tmp/install-metricbeat.bash
+beats_version: oss-latest
+beat: metricbeat
+beats_package_url: "https://{{ rgm_ip }}/distrib/packages"
 v_win_url_oneliner: 'https://{{ rgm_ip }}/distrib/install/Add-RGMHost.ps1'
+
+metricbeat_linux_conf_path: https://{{ rgm_ip }}/distrib/conf
+
+rgmapi_version: "v2"
+# workaround for old installation of RGM without api/v2
+
+api:
+  - paths:
+      version: "v2"
+      gettokenpath: "api/v2/getAuthToken"
+      createhostpath: "api/v2/host/createHost"
+      exportconfpath: "api/v2/nagios/export/exportConfiguration"
+  - paths:
+      version: "v1"
+      gettokenpath: "rgmapi/getAuthToken"
+      createhostpath: "rgmapi/createHost"
+      exportconfpath: "rgmapi/exportConfiguration"
+
+# to force RGM registration, use force_rgm_registration=yes
