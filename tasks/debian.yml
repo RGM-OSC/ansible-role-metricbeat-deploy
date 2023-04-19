@@ -1,54 +1,24 @@
 ---
-# - name: debian | install needed packages
-#   apt:
-#     update_cache: true
-#     dpkg_options: force-confold
-#     name: '{{ v_deb_needed_pkg }}'
-#     state: present
-#     install_recommends: false
-
-
-
 - name: Debian - Check if {{ beat }}  package is installed
-  package_facts:
+  ansible.builtin.package_facts:
     manager: apt
 
 - name: Debian - unhold {{ beat }} version for install
-  become: yes
-  dpkg_selections:
+  become: true
+  ansible.builtin.dpkg_selections:
     name: "{{ beat }}"
     selection: "install"
   when: beat in ansible_facts.packages
   changed_when: false
 
-# - name: Debian - Ensure {{ beat }} is installed
-#   become: yes
-#   apt:
-#     name: >-
-#       {{ beat }}{% if beats_version is defined and beats_version|length>0 %}={{ beats_version }}{% endif %}
-#     state: present
-#     cache_valid_time: 86400
-#   register: beat_install
-#   until: beat_install is succeeded
-#   when: use_repository | bool
-#   notify: restart the service
-
-# - name: Debian - hold {{ beat }} version
-#   become: yes
-#   dpkg_selections:
-#     name: "{{ beat }}"
-#     selection: "hold"
-#   when: version_lock
-#   changed_when: false
-
 - name: Set os_arch
-  set_fact:
+  ansible.builtin.set_fact:
     os_arch: "amd64"
     # os_arch: >-
     #   {{ (ansible_architecture == 'x86_64') | ternary('amd64', 'i386') }}
 
 - name: Debian - Download {{ beat }} from url
-  get_url:
+  ansible.builtin.get_url:
     url: >-
       {% if custom_package_url is defined %}{{ custom_package_url }}{%
         else %}{{ beats_package_url }}/{{ beat }}-{{ beats_version }}-{{ os_arch }}.deb{% endif %}
@@ -56,8 +26,8 @@
     validate_certs: false
 
 - name: Debian - Ensure {{ beat }} is installed from downloaded package
-  become: yes
-  apt:
+  become: true
+  ansible.builtin.apt:
     deb: "/tmp/{{ beat }}_{{ beats_version }}_{{ os_arch }}.deb"
   # when: not use_repository | bool
   # notify: restart the service

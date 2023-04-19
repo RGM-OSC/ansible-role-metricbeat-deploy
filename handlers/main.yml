@@ -1,12 +1,12 @@
 ---
 - name: win restart metricbeat service
-  win_service:
+  ansible.windows.win_service:
     name: metricbeat
     state: restarted
     start_mode: auto
 
 - name: restart metricbeat service
-  service:
+  ansible.builtin.service:
     name: metricbeat
     state: restarted
     sleep: 5
