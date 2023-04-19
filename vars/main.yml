@@ -9,10 +9,10 @@ v_centos_needed_pkg:
 v_mbd_dest: /tmp/install-metricbeat.bash
 beats_version: oss-latest
 beat: metricbeat
-beats_package_url: "https://{{ rgm_ip }}/distrib/packages"
-v_win_url_oneliner: 'https://{{ rgm_ip }}/distrib/install/Add-RGMHost.ps1'
+beats_package_url: "https://{{ rgm_server }}/distrib/packages"
+v_win_url_oneliner: 'https://{{ rgm_server }}/distrib/install/Add-RGMHost.ps1'
 
-metricbeat_linux_conf_path: https://{{ rgm_ip }}/distrib/conf
+metricbeat_linux_conf_path: https://{{ rgm_server }}/distrib/conf
 
 rgmapi_version: "v2"
 # workaround for old installation of RGM without api/v2

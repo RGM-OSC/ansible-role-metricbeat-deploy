@@ -1,24 +1,24 @@
 ---
 
 - name: define current api path
-  set_fact:
+  ansible.builtin.set_fact:
     apipath: "{{ api | community.general.json_query(query) }}"
   vars:
     query: "[?paths.version=='{{ rgmapi_version }}'].paths"
 
 
-- name: create_rgm_host | get rgm token
-  uri:
-    url: 'https://{{ rgm_ip }}/{{ apipath[0].gettokenpath }}?username={{ rgm_adm_username }}&password={{ rgm_adm_password }}'
+- name: create_rgm_server | get rgm token
+  ansible.builtin.uri:
+    url: 'https://{{ rgm_server }}/{{ apipath[0].gettokenpath }}?username={{ rgm_username }}&password={{ rgm_password }}'
     remote_src: true
     method: GET
     status_code: 200
     validate_certs: false
   register: rgm_token
 
-- name: create_rgm_host | check rgm host
-  uri:
-    url: 'https://{{ rgm_ip }}/rgmapi/getHost'
+- name: create_rgm_server | check rgm host
+  ansible.builtin.uri:
+    url: 'https://{{ rgm_server }}/rgmapi/getHost'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
@@ -26,12 +26,12 @@
       hostIp: "{{ ansible_default_ipv4['address'] }}"
       templateHostName: "{{ d_rgm_template }}"
     body_format: json
-    validate_certs: no
-  register: get_rgm_host_task
+    validate_certs: false
+  register: get_rgm_server_task
 
-- name: create_rgm_host | create rgm host
-  uri:
-    url: 'https://{{ rgm_ip }}/{{ apipath[0].createhostpath }}'
+- name: create_rgm_server | create rgm host
+  ansible.builtin.uri:
+    url: 'https://{{ rgm_server }}/{{ apipath[0].createhostpath }}'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
@@ -41,11 +41,11 @@
       exportConfiguration: true
     body_format: json
     validate_certs: false
-  when: get_rgm_host_task.json.result is not mapping
+  when: get_rgm_server_task.json.result is not mapping
 
-- name: create_rgm_host | export configuration
-  uri:
-    url: 'https://{{ rgm_ip }}/{{ apipath[0].exportconfpath }}'
+- name: create_rgm_server | export configuration
+  ansible.builtin.uri:
+    url: 'https://{{ rgm_server }}/{{ apipath[0].exportconfpath }}'
     method: POST
     body:
       token: "{{ rgm_token.json.RGMAPI_TOKEN }}"
@@ -53,5 +53,4 @@
     body_format: json
     status_code: 200
     validate_certs: false
-  when: get_rgm_host_task.json.result is not mapping
-
+  when: get_rgm_server_task.json.result is not mapping

@@ -1,27 +1,27 @@
 ---
 - name: linux | test is metricbeat already deployed
-  stat:
+  ansible.builtin.stat:
     path: /etc/metricbeat
   register: metricbeat_conf_dir
 
 - name: linux | import debian specific tasks
-  import_tasks: debian.yml
+  ansible.builtin.import_tasks: debian.yml
   when: ansible_os_family == 'Debian'
 
 - name: linux | import centos specific tasks
-  import_tasks: centos.yml
+  ansible.builtin.import_tasks: centos.yml
   when: ansible_os_family == 'RedHat'
 
 - name: linux | deploy rgm system metrics configurations
-  become: yes
-  get_url:
+  become: true
+  ansible.builtin.get_url:
     url: '{{ item.src }}'
     dest: '{{ item.dest }}'
     owner: root
     group: root
     mode: 0644
-    validate_certs: no
-  with_items:
+    validate_certs: false
+  loop:
     - {src: '{{ metricbeat_linux_conf_path }}/linux_metricbeat.yml', dest: '/etc/metricbeat/metricbeat.yml'}
     - {src: '{{ metricbeat_linux_conf_path }}/modules/linux_rgm-system-core.yml', dest: '/etc/metricbeat/modules.d/rgm-system-core.yml'}
     - {src: '{{ metricbeat_linux_conf_path }}/modules/linux_rgm-system-fs.yml', dest: '/etc/metricbeat/modules.d/rgm-system-fs.yml'}
@@ -30,14 +30,14 @@
     - configure
 
 - name: linux | set current host IP in linux_metricbeat.yml
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /etc/metricbeat/metricbeat.yml
-    regexp : '^  host.ip: %%IP%%$'
+    regexp: '^  host.ip: %%IP%%$'
     line: "  host.ip: {{ ansible_default_ipv4.address }}"
 
 - name: linux | Change linux_metricbeat.yml ownership, group and permissions
-  become: yes
+  become: true
   ansible.builtin.file:
     path: /etc/metricbeat/metricbeat.yml
     owner: root
@@ -46,15 +46,15 @@
 
 
 - name: linux | test is metricbeat default system module is active
-  stat:
+  ansible.builtin.stat:
     path: /etc/metricbeat/modules.d/system.yml
   register: metricbeat_system_mod
   tags:
     - configure
 
 - name: linux | copy original system module configuration
-  become: yes
-  copy:
+  become: true
+  ansible.builtin.copy:
     src: '/etc/metricbeat/modules.d/system.yml'
     dest: '/etc/metricbeat/modules.d/system.yml.disabled'
     remote_src: true
@@ -64,8 +64,8 @@
     - configure
 
 - name: linux | delete active default system module
-  become: yes
-  file:
+  become: true
+  ansible.builtin.file:
     path: '/etc/metricbeat/modules.d/system.yml'
     state: absent
   when: metricbeat_system_mod.stat.exists
@@ -73,18 +73,18 @@
     - configure
 
 - name: linux | import hold_pkg.yml
-  import_tasks: hold_pkg.yml
+  ansible.builtin.import_tasks: hold_pkg.yml
 
 - name: linux | import create rgm host
-  import_tasks: create_rgm_host.yml
+  ansible.builtin.import_tasks: create_rgm_server.yml
   when: not metricbeat_conf_dir.stat.exists or force_rgm_registration is defined
 
 - name: linux | Pause before start service
-  pause:
+  ansible.builtin.pause:
     seconds: 5
 
 - name: linux | restart metricbeat service
-  become: yes
-  service:
+  become: true
+  ansible.builtin.service:
     name: metricbeat
     state: restarted

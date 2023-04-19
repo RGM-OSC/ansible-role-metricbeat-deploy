@@ -1,33 +1,33 @@
 ---
 - name: windows | get service status
-  win_service:
+  ansible.windows.win_service:
     name: 'metricbeat'
   register: service_info
 
 - name: windows | notify handler to restart service
-  debug:
+  ansible.builtin.debug:
     msg: restart metricbeat service
   notify: win restart metricbeat service
   changed_when: true
   when: service_info['exists'] and service_info['state'] != "running"
 
 - name: windows | ensure temp directory exist
-  win_file:
+  ansible.windows.win_file:
     path: 'C:\temp'
     state: directory
 
 - name: windows | download rgm oneliner script
-  win_get_url:
+  ansible.windows.win_get_url:
     url: '{{ v_win_url_oneliner }}'
     dest: 'C:\temp\Add-RGMHost.ps1'
     validate_certs: false
   when: not service_info['exists']
 
 - name: windows | perform metricbeat installation and importation
-  win_shell: |
-    C:\temp\Add-RGMHost.ps1 -Username "{{ rgm_adm_username }}" `
-      -Password "{{ rgm_adm_password }}" `
-      -RGMServer "{{ rgm_ip }}" `
+  ansible.windows.win_shell: |
+    C:\temp\Add-RGMHost.ps1 -Username "{{ rgm_username }}" `
+      -Password "{{ rgm_password }}" `
+      -RGMServer "{{ rgm_server }}" `
       -RGMTemplate "{{ d_rgm_win_template }}" `
       -NoExportConfig:([System.Convert]::ToBoolean("{{ no_export_config | default(no,True) }}")) `
       -Verbose:([System.Convert]::ToBoolean("{{ script_verbose | default(no,True) }}"))
@@ -35,46 +35,6 @@
   notify: win restart metricbeat service
 
 - name: windows | remove downloaded rgm onliner script
-  win_file:
+  ansible.windows.win_file:
     path: 'C:\temp\Add-RGMHost.ps1'
     state: absent
-
-### Comment tasks managed by the Powerhell installer
-
-# - name: windows | deploy rgm system metrics configurations
-#   win_template:
-#     src: '{{ item.src }}'
-#     dest:  '{{ item.dest }}'
-#   with_items:
-#     - { src: 'metricbeat/module-system-core.yml.j2', dest: 'C:\Program Files\Metricbeat\modules.d\rgm-system-core.yml' }
-#     - { src: 'metricbeat/module-system-fs.yml.j2', dest: 'C:\Program Files\Metricbeat\modules.d\rgm-system-fs.yml' }
-#     - { src: 'metricbeat/module-system-uptime.yml.j2', dest: 'C:\Program Files\Metricbeat\modules.d\rgm-system-uptime.yml' }
-#   notify: win restart metricbeat service
-#   tags:
-#     - configure
-
-# - name: windows | test is metricbeat default system module is active
-#   win_stat:
-#     path: 'C:\Program Files\Metricbeat\modules.d\system.yml'
-#   register: metricbeat_system_mod
-#   tags:
-#     - configure
-
-# - name: windows | copy original system module configuration
-#   win_copy:
-#     src: 'C:\Program Files\Metricbeat\modules.d\system.yml'
-#     dest: 'C:\Program Files\Metricbeat\modules.d\system.yml.disabled'
-#     remote_src: yes
-#   notify: win restart metricbeat service
-#   when: metricbeat_system_mod.stat.exists
-#   tags:
-#     - configure
-
-# - name: windows | delete active default system module
-#   win_file:
-#     path: 'C:\Program Files\Metricbeat\modules.d\system.yml'
-#     state: absent
-#   notify: win restart metricbeat service
-#   when: metricbeat_system_mod.stat.exists
-#   tags:
-#     - configure
