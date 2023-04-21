@@ -1,22 +1,22 @@
 ---
-- name: hold_pkg | debian hold package to prevent unneeded updates
+- name: Hold_pkg | debian hold package to prevent unneeded updates
   become: true
-  ansible.buitlin.dpkg_selections:
+  ansible.builtin.dpkg_selections:
     name: "{{ beat }}"
     selection: hold
   when: ansible_os_family == 'Debian'
 
-- name: hold_pkg | RedHat hold package to prevent unneeded updates
+- name: Hold_pkg | RedHat hold package to prevent unneeded updates
+  when: ansible_os_family == 'RedHat'
   block:
-    - name: hold_pkg | RedHat stat if elasticsearch repository exist
-      ansible.buitlin.stat:
+    - name: Hold_pkg | RedHat stat if elasticsearch repository exist
+      ansible.builtin.stat:
         path: /etc/yum.repos.d/elasticsearch.repo
       register: elk_repository
 
-    - name: hold_pkg | add exclusion for metricbeat in elasticsearch repository
-      ansible.buitlin.lineinfile:
+    - name: Hold_pkg | add exclusion for metricbeat in elasticsearch repository
+      ansible.builtin.lineinfile:
         path: /etc/yum.repos.d/elasticsearch.repo
         regexp: 'exclude\s+='
         line: 'exclude=metricbeat'
       when: elk_repository.stat.exists
-  when: ansible_os_family == 'RedHat'

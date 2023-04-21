@@ -13,7 +13,7 @@ It perform following tasks :
 > - `rgm_adm_username` -> `rgm_username`
 > - `rgm_adm_password` -> `rgm_password`
 > - `rgm_ip` -> `rgm_server`
- 
+
 
 ## Requirements
 
@@ -25,19 +25,20 @@ Some of this variables **absolutely need to be defined** to get fully working pl
 
 ## Role Variables
 
-| name                             | default value             | usage                                                    |
-| -------------------------------- | --------------------------| -------------------------------------------------------- |
-| ```rgm_server```                 |                           | RGM IP or hostname to get install script and use API     |
-| ```rgm_username```               |                           | RGM username account allowed to create new hosts                   |
-| ```rgm_password```               |                           | RGM password account allowed to create new hosts                   |
-| ```d_rgm_template```             | RGM_LINUX_ES              | RGM template applied to new hosts                        |
-| ```d_rgm_win_template```         | RGM_WINDOWS_ES            | RGM template applied to new windows hosts                |
-| ```d_rgm_exportjob_name```       | Incremental Nagios Export | RGM export job name used to import new hosts             |
-| ```no_export_config```           | no                        | Windows only. do not export rgm configuration. usefull for larges volumes |
-| ```script_verbose```             | no                        | Windows only. launch script in verbose mode              |
-| ```remove_metricbeat_services``` | no                        | Launch only metricbeat service deletion                  |
-| ```rgmapi_version```             | v2                        | Select the api version, v1 is for previous RGM installations |
-| ```force_rgm_registration```     |                           | create this variable to force rgm host registration even metricbeat already installed |
+| name                         | default value             | usage                                                        | perimeter |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------ | --------- |
+| `rgm_server`                 |                           | RGM IP or hostname to get install script and use API         | Both      |
+| `rgm_username`               |                           | RGM username account allowed to create new hosts             | Both      |
+| `rgm_password`               |                           | RGM password account allowed to create new hosts             | Both      |
+| `d_rgm_template`             | RGM_LINUX_ES              | RGM template applied to new hosts                            | Linux     |
+| `d_rgm_win_template`         | RGM_WINDOWS_ES            | RGM template applied to new windows hosts                    | Windows   |
+| `d_rgm_exportjob_name`       | Incremental Nagios Export | RGM export job name used to import new hosts                 | Linux     |
+| `no_export_config`           | false                     | Do not export rgm configuration. usefull for larges volumes  | Windows   |
+| `script_verbose`             | false                     | Launch script in verbose mode                                | Windows   |
+| `forceinstall`               |                           | Force Metricbeat reinstallation                              | Windows   |
+| `remove_metricbeat_services` | false                     | Launch only metricbeat service deletion                      | Windows   |
+| `rgmapi_version`             | v2                        | Select the api version, v1 is for previous RGM installations | Both      |
+| `force_rgm_registration`     |                           | create this variable to force rgm host registration even metricbeat already installed | Linux     |
 
 ## Role tags
 
@@ -67,13 +68,29 @@ collection:
 ```yaml
 ---
 - hosts: monitored
-  roles:
-    - role-metricbeat-deploy
   vars:
     rgm_server: <rgm_servername>
     rgm_username: <rgm_admin_username>
     rgm_password: <rgm_admin_password>
+
+roles:
+    - role-metricbeat-deploy
 ```
+
+Another example for windows to force reinstall (or update metricbeat) but without register again. vars for authentication are not managed here
+
+```yaml
+---
+- hosts: monitored
+  vars:
+    forceinstall: true
+    no_export_config: true
+
+  roles:
+    - role-metricbeat-deploy
+```
+
+
 
 ## License
 

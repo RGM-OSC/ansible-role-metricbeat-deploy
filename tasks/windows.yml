@@ -1,40 +1,41 @@
 ---
-- name: windows | get service status
+- name: Windows | get service status
   ansible.windows.win_service:
     name: 'metricbeat'
   register: service_info
 
-- name: windows | notify handler to restart service
+- name: Windows | notify handler to restart service
   ansible.builtin.debug:
     msg: restart metricbeat service
   notify: win restart metricbeat service
   changed_when: true
   when: service_info['exists'] and service_info['state'] != "running"
 
-- name: windows | ensure temp directory exist
+- name: Windows | ensure temp directory exist
   ansible.windows.win_file:
     path: 'C:\temp'
     state: directory
 
-- name: windows | download rgm oneliner script
-  ansible.windows.win_get_url:
-    url: '{{ v_win_url_oneliner }}'
-    dest: 'C:\temp\Add-RGMHost.ps1'
-    validate_certs: false
-  when: not service_info['exists']
+- name: Service does not exist, installation, or force reinstall
+  when: (not service_info['exists']) or (forceinstall is defined and forceinstall | bool )
+  block:
+    - name: Windows | download rgm oneliner script
+      ansible.windows.win_get_url:
+        url: '{{ v_win_url_oneliner }}'
+        dest: 'C:\temp\Add-RGMHost.ps1'
+        validate_certs: false
 
-- name: windows | perform metricbeat installation and importation
-  ansible.windows.win_shell: |
-    C:\temp\Add-RGMHost.ps1 -Username "{{ rgm_username }}" `
-      -Password "{{ rgm_password }}" `
-      -RGMServer "{{ rgm_server }}" `
-      -RGMTemplate "{{ d_rgm_win_template }}" `
-      -NoExportConfig:([System.Convert]::ToBoolean("{{ no_export_config | default(no,True) }}")) `
-      -Verbose:([System.Convert]::ToBoolean("{{ script_verbose | default(no,True) }}"))
-  when: not service_info['exists']
-  notify: win restart metricbeat service
+    - name: Windows | perform metricbeat installation and importation
+      ansible.windows.win_shell: |
+        C:\temp\Add-RGMHost.ps1 -Username "{{ rgm_username }}" `
+          -Password "{{ rgm_password }}" `
+          -RGMServer "{{ rgm_server }}" `
+          -RGMTemplate "{{ d_rgm_win_template }}" `
+          -NoExportConfig:([System.Convert]::ToBoolean("{{ no_export_config | default(False, True) }}")) `
+          -Verbose:([System.Convert]::ToBoolean("{{ script_verbose | default(false, True) }}"))
+      notify: win restart metricbeat service
 
-- name: windows | remove downloaded rgm onliner script
+- name: Windows | remove downloaded rgm onliner script
   ansible.windows.win_file:
     path: 'C:\temp\Add-RGMHost.ps1'
     state: absent

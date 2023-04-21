@@ -1,11 +1,11 @@
 ---
-- name: centos | install needed packages
+- name: Centos | install needed packages
   ansible.builtin.yum:
     update_cache: true
     name: '{{ v_centos_needed_pkg }}'
     state: installed
 
-- name: RedHat - Install {{ beat }} from url
+- name: RedHat - Install {{ beat }} from url"
   become: true
   ansible.builtin.yum:
     name: >-
