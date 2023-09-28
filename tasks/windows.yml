@@ -31,8 +31,8 @@
       -Password "{{ rgm_password }}" `
       -RGMServer "{{ rgm_server }}" `
       -RGMTemplate "{{ d_rgm_win_template }}" `
-      -NoExportConfig:([System.Convert]::ToBoolean("{{ no_export_config | default(no, True) }}")) `
-      -Verbose:([System.Convert]::ToBoolean("{{ script_verbose | default(no, True) }}"))
+      -NoExportConfig:([System.Convert]::ToBoolean("{{ no_export_config | default(False, True) }}")) `
+      -Verbose:([System.Convert]::ToBoolean("{{ script_verbose | default(False, True) }}"))
 
 - name: 'Windows | remove downloaded rgm onliner script'
   ansible.windows.win_file:
