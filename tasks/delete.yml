@@ -1,16 +1,16 @@
 ---
-- name: delete | get service status
-  ansible.windows.win_service:
-    name: 'metricbeat'
+- name: 'Delete | get service status'
   when: ansible_system == 'Win32NT'
   register: service_info
+  ansible.windows.win_service:
+    name: 'metricbeat'
 
-- name: delete | stop metricbeat service
+- name: 'Delete | stop metricbeat service'
+  when: service_info['exists'] and service_info['state'] == "running" and ansible_system == 'Win32NT'
   ansible.windows.win_service:
     name: 'metricbeat'
     state: stopped
-  when: service_info['exists'] and service_info['state'] == "running" and ansible_system == 'Win32NT'
 
-- name: delete | remove metricbeat service
-  ansible.windows.win_shell: (Get-WmiObject Win32_Service -filter "name='metricbeat'").Delete()
+- name: 'Delete | remove metricbeat service'
   when: service_info['exists'] and ansible_system == 'Win32NT'
+  ansible.windows.win_shell: (Get-WmiObject Win32_Service -filter "name='metricbeat'").Delete()

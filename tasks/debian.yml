@@ -1,9 +1,9 @@
 ---
-- name: Debian - Check if {{ beat }}  package is installed
+- name: 'Debian | Check if {{ beat }}  package is installed' # noqa name[template]
   ansible.builtin.package_facts:
     manager: apt
 
-- name: Debian - unhold {{ beat }} version for install
+- name: 'Debian | Unhold {{ beat }} version for install' # noqa name[template]
   become: true
   ansible.builtin.dpkg_selections:
     name: "{{ beat }}"
@@ -11,21 +11,24 @@
   when: beat in ansible_facts.packages
   changed_when: false
 
-- name: Set os_arch
+- name: 'Debian | Set os_arch'
   ansible.builtin.set_fact:
     os_arch: "amd64"
     # os_arch: >-
     #   {{ (ansible_architecture == 'x86_64') | ternary('amd64', 'i386') }}
 
-- name: Debian - Download {{ beat }} from url
+- name: 'Debian | Download {{ beat }} from url' # noqa name[template]
+  become: true
   ansible.builtin.get_url:
     url: >-
-      {% if custom_package_url is defined %}{{ custom_package_url }}{%
-        else %}{{ beats_package_url }}/{{ beat }}-{{ beats_version }}-{{ os_arch }}.deb{% endif %}
+      {% if custom_package_url is defined %}{{ custom_package_url }}{% else %}{{ beats_package_url }}/{{ beat }}-{{ beats_version }}-{{ os_arch }}.deb{% endif %}
     dest: "/tmp/{{ beat }}_{{ beats_version }}_{{ os_arch }}.deb"
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
     validate_certs: false
 
-- name: Debian - Ensure {{ beat }} is installed from downloaded package
+- name: 'Debian | Ensure {{ beat }} is installed from downloaded package' # noqa name[template]
   become: true
   ansible.builtin.apt:
     deb: "/tmp/{{ beat }}_{{ beats_version }}_{{ os_arch }}.deb"

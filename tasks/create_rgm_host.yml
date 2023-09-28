@@ -1,22 +1,22 @@
 ---
 
-- name: define current api path
-  ansible.builtin.set_fact:
-    apipath: "{{ api | community.general.json_query(query) }}"
+- name: 'Create_rgm_host | define current api path'
   vars:
     query: "[?paths.version=='{{ rgmapi_version }}'].paths"
+  ansible.builtin.set_fact:
+    apipath: "{{ api | community.general.json_query(query) }}"
 
-
-- name: create_rgm_server | get rgm token
+- name: 'Create_rgm_host | get rgm token'
+  register: rgm_token
   ansible.builtin.uri:
     url: 'https://{{ rgm_server }}/{{ apipath[0].gettokenpath }}?username={{ rgm_username }}&password={{ rgm_password }}'
     remote_src: true
     method: GET
     status_code: 200
     validate_certs: false
-  register: rgm_token
 
-- name: create_rgm_server | check rgm host
+- name: 'Create_rgm_host | Check rgm host'
+  register: get_rgm_server_task
   ansible.builtin.uri:
     url: 'https://{{ rgm_server }}/rgmapi/getHost'
     method: POST
@@ -27,9 +27,9 @@
       templateHostName: "{{ d_rgm_template }}"
     body_format: json
     validate_certs: false
-  register: get_rgm_server_task
 
-- name: create_rgm_server | create rgm host
+- name: 'Create_rgm_host | Create rgm host'
+  when: get_rgm_server_task.json.result is not mapping
   ansible.builtin.uri:
     url: 'https://{{ rgm_server }}/{{ apipath[0].createhostpath }}'
     method: POST
@@ -41,9 +41,9 @@
       exportConfiguration: true
     body_format: json
     validate_certs: false
-  when: get_rgm_server_task.json.result is not mapping
 
-- name: create_rgm_server | export configuration
+- name: 'Create_rgm_host | Export configuration'
+  when: get_rgm_server_task.json.result is not mapping
   ansible.builtin.uri:
     url: 'https://{{ rgm_server }}/{{ apipath[0].exportconfpath }}'
     method: POST
@@ -53,4 +53,3 @@
     body_format: json
     status_code: 200
     validate_certs: false
-  when: get_rgm_server_task.json.result is not mapping

@@ -1,15 +1,18 @@
 ---
-- name: import check os
+- name: 'Import check os'
   ansible.builtin.import_tasks: checkos.yml
 
-- name: import linux tasks
-  ansible.builtin.import_tasks: linux.yml
+- name: 'Import linux tasks'
   when: ( ansible_os_family == 'Debian' or  ansible_os_family == 'RedHat') and  ansible_system == 'Linux' and remove_metricbeat_services == 'no'
+  ansible.builtin.import_tasks: linux.yml
 
-- name: import windows tasks
+- name: 'Import windows tasks'
+  when:
+    - ansible_distribution_major_version|int > 5
+    - ansible_system == 'Win32NT'
+    - remove_metricbeat_services == 'no'
   ansible.builtin.import_tasks: windows.yml
-  when: ansible_distribution_major_version|int > 5 and ansible_system == 'Win32NT' and remove_metricbeat_services == 'no'
 
-- name: import service removing tasks
-  ansible.builtin.import_tasks: delete.yml
+- name: 'Import service removing tasks'
   when: remove_metricbeat_services == 'yes'
+  ansible.builtin.import_tasks: delete.yml
