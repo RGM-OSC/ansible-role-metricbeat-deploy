@@ -20,9 +20,9 @@ rgmapi_version: "v2"
 api:
   - paths:
       version: "v2"
-      gettokenpath: "api/v2/getAuthToken"
-      createhostpath: "api/v2/host/createHost"
-      exportconfpath: "api/v2/nagios/export/exportConfiguration"
+      gettokenpath: "api/v2/token"
+      createhostpath: "api/v2/host"
+      exportconfpath: "api/v2/nagios/export"
   - paths:
       version: "v1"
       gettokenpath: "rgmapi/getAuthToken"
